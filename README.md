@@ -1,3 +1,16 @@
+# Progetto finale Cyber Blog
+
+Documentazione delle challenge (paper PDF):
+
+- [Challenge 1 – Rate limiter](docs/challenge-1.pdf)
+- [Challenge 2 – CSRF / operazioni critiche in GET](docs/challenge-2.pdf)
+- [Challenge 3 – Logging](docs/challenge-3.pdf)
+- [Challenge 4 – Manomissione input (news)](docs/challenge-4.pdf)
+- [Challenge 5 – Validazione contenuto articolo](docs/challenge-5.pdf)
+- [Challenge 6 – Fillable / mass assignment](docs/challenge-6.pdf)
+
+---
+
 ## Rate limiter mancante
 
 ### Scenario:
@@ -42,12 +55,11 @@ Nella proprietà fillable del modello in questione inserire tutti solo i campi g
 Esiste la funzionalità di suggerimento news recenti in fase di scrittura dell'articolo per prendere ispirazione. E' presente un menu a scelta facilmente alterabile da ispeziona elemento. L'utente malintenzionato con un minimo di conoscenza del sistema cambia l'url e prova a far lanciare al server una richiesta che lui non sarebbe autorizzato.
 Per esempio il server recupera dei dati sugli utenti da un altro server in esecuzione sulla porta 8001. 
 
-
 ### Mitigazione
 Rimodellare la funzionalità in modo tale da non poter lasciare spazio di modifica dell'url da parte di utenti malevoli. Implementare o migliorare la validazione delgli input.
 
-https://newsapi.org/docs/endpoints/top-headlines
-NewsAPI - api key 5fbe92849d5648eabcbe072a1cf91473
+https://newsapi.org/docs/endpoints/top-headlines  
+(API key in `.env` come `NEWSAPI_API_KEY`, non in questo README)
 
 ## Stored XSS Attack
 
@@ -58,4 +70,3 @@ Supponiamo che ci sia una misconfiguration a livello di CORS (config/cors.php) c
 
 ### Mitigazione
 Creare un meccanismo che filtri il testo prima di salvarlo e per essere sicuri anche in fase di visualizzazione dell'articolo.
-
