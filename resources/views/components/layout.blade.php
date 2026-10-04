@@ -23,15 +23,16 @@
     <div class="min-vh-100">
         {{ $slot }}
     </div>
-    <!-- Place the first <script> tag in your HTML's <head> -->
+    {{-- TinyMCE disattivato temporaneamente per Challenge 5 (prova prima) --}}
+    {{--
         <script src="https://cdn.tiny.cloud/1/6aujx1sqwo157ot7gbesha78g0qbl2ci3hz6lw4ddt7url4e/tinymce/7/tinymce.min.js" referrerpolicy="origin"></script>
-        <!-- Place the following <script> and <textarea> tags your HTML's <body> -->
-            <script>
+        <script>
                 tinymce.init({
                     selector: 'textarea',
                     plugins: 'anchor autolink charmap codesample emoticons image link lists media searchreplace table visualblocks wordcount linkchecker',
                     toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link image media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat',
                 });
-            </script>
-        </body>
-        </html>
+        </script>
+    --}}
+</body>
+</html>
