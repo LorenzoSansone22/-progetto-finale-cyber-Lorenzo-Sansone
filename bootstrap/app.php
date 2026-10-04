@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Middleware\FrameGuard;
-use App\Http\Middleware\RateLimit;
+//use App\Http\Middleware\RateLimit;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -13,7 +13,9 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        // $middleware->append(RateLimit::class);
+        $middleware->appendToGroup('web', \App\Http\Middleware\TemporaryIpBlock::class);
+        $middleware->appendToGroup('web', 'throttle:global');
+
         $middleware->alias([
             'admin' => App\Http\Middleware\UserIsAdmin::class,
             'revisor' => App\Http\Middleware\UserIsRevisor::class,

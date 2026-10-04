@@ -1,13 +1,13 @@
 #!/bin/bash
 
 # URL della rotta da attaccare
-URL="http://external.user:8000/articles/search"
+URL="http://cyber.blog:8000/articles/search"
 
 # Generare un grande payload casuale
 LARGE_PAYLOAD=$(head -c 50000 < /dev/urandom | base64)
 
 # Numero di richieste da inviare
-NUM_REQUESTS=1000
+NUM_REQUESTS=100
 
 # Limite massimo di processi simultanei
 MAX_PARALLEL_REQUESTS=200
