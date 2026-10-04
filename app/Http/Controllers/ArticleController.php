@@ -6,6 +6,7 @@ use App\Models\Tag;
 use App\Models\User;
 use App\Models\Article;
 use App\Models\Category;
+use App\Services\HtmlFilterService;
 use Illuminate\Support\Str;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
@@ -22,27 +23,19 @@ class ArticleController extends Controller implements HasMiddleware
             new Middleware('auth', except: ['index', 'show', 'byCategory', 'byUser', 'articleSearch']),
         ];
     }
-    /**
-     * Display a listing of the resource.
-     */
+
     public function index()
     {
         $articles = Article::where('is_accepted', true)->orderBy('created_at', 'desc')->get();
         return view('articles.index', compact('articles'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('articles.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request, HtmlFilterService $htmlFilterService)
     {
         $request->validate([
             'title' => 'required|unique:articles|min:5',
@@ -56,7 +49,7 @@ class ArticleController extends Controller implements HasMiddleware
         $article = Article::create([
             'title' => $request->title,
             'subtitle' => $request->subtitle,
-            'body' => $request->body,
+            'body' => $htmlFilterService->filter($request->body),
             'image' => $request->file('image')->store('public/images'),
             'category_id' => $request->category,
             'user_id' => Auth::user()->id,
@@ -76,20 +69,22 @@ class ArticleController extends Controller implements HasMiddleware
             $article->tags()->attach($newTag);
         }
 
+        Log::info('Articolo creato', [
+            'article_id' => $article->id,
+            'title' => $article->title,
+            'user_id' => Auth::id(),
+            'ip' => $request->ip(),
+        ]);
+
         return redirect(route('homepage'))->with('message', 'Articolo creato con successo');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Article $article)
+    public function show(Article $article, HtmlFilterService $htmlFilterService)
     {
+        $article->body = $htmlFilterService->filter($article->body ?? '');
         return view('articles.show', compact('article'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(Article $article)
     {
         if(Auth::user()->id != $article->user_id){
@@ -98,10 +93,7 @@ class ArticleController extends Controller implements HasMiddleware
         return view('articles.edit', compact('article'));
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Article $article)
+    public function update(Request $request, Article $article, HtmlFilterService $htmlFilterService)
     {
         $request->validate([
             'title' => 'required|min:5|unique:articles,title,' . $article->id,
@@ -115,7 +107,7 @@ class ArticleController extends Controller implements HasMiddleware
         $article->update([
             'title' => $request->title,
             'subtitle' => $request->subtitle,
-            'body' => $request->body,
+            'body' => $htmlFilterService->filter($request->body),
             'category_id' => $request->category,
             'slug' => Str::slug($request->title),
         ]);
@@ -143,18 +135,30 @@ class ArticleController extends Controller implements HasMiddleware
         }
         $article->tags()->sync($newTags);
 
+        Log::info('Articolo modificato', [
+            'article_id' => $article->id,
+            'title' => $article->title,
+            'user_id' => Auth::id(),
+            'ip' => $request->ip(),
+        ]);
+
         return redirect(route('writer.dashboard'))->with('message', 'Articolo modificato con successo');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Article $article)
     {
+        $articleId = $article->id;
+
         foreach ($article->tags as $tag) {
             $article->tags()->detach($tag);
         }
         $article->delete();
+
+        Log::info('Articolo eliminato', [
+            'article_id' => $articleId,
+            'user_id' => Auth::id(),
+            'ip' => request()->ip(),
+        ]);
         
         return redirect()->back()->with('message', 'Articolo cancellato con successo');
     }

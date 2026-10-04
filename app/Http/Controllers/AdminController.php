@@ -58,6 +58,13 @@ class AdminController extends Controller
         $user->is_admin = true;
         $user->save();
 
+        Log::info('Ruolo assegnato: admin', [
+            'target_user_id' => $user->id,
+            'target_email' => $user->email,
+            'admin_id' => Auth::id(),
+            'ip' => request()->ip(),
+        ]);
+
         return redirect(route('admin.dashboard'))->with('message', "$user->name is now administrator");
     }
 
@@ -65,12 +72,26 @@ class AdminController extends Controller
         $user->is_revisor = true;
         $user->save();
 
+        Log::info('Ruolo assegnato: revisor', [
+            'target_user_id' => $user->id,
+            'target_email' => $user->email,
+            'admin_id' => Auth::id(),
+            'ip' => request()->ip(),
+        ]);
+
         return redirect(route('admin.dashboard'))->with('message', "$user->name is now revisor");
     }
 
     public function setWriter(User $user){
         $user->is_writer = true;
         $user->save();
+
+        Log::info('Ruolo assegnato: writer', [
+            'target_user_id' => $user->id,
+            'target_email' => $user->email,
+            'admin_id' => Auth::id(),
+            'ip' => request()->ip(),
+        ]);
 
         return redirect(route('admin.dashboard'))->with('message', "$user->name is now writer");
     }
