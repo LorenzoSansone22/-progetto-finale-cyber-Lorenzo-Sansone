@@ -2,7 +2,6 @@
 
 namespace App\Livewire;
 
-use GuzzleHttp\Client;
 use Livewire\Component;
 use App\Services\HttpService;
 
@@ -19,14 +18,24 @@ class LatestNews extends Component
 
     public function fetchNews()
     {
-        if (filter_var($this->selectedApi, FILTER_VALIDATE_URL) === FALSE) {
-            $this->news = 'Invalid URL';
+        $allowedCountries = ['it', 'gb', 'us'];
+
+        if (!in_array($this->selectedApi, $allowedCountries, true)) {
+            $this->news = ['error' => 'Selezione non valida'];
             return;
         }
 
-        $this->news = json_decode($this->httpService->getRequest($this->selectedApi), true);
+        $apiKey = config('services.newsapi.api_key');
+        $url = "https://newsapi.org/v2/top-headlines?country={$this->selectedApi}&apiKey={$apiKey}";
 
+        $response = $this->httpService->getRequest($url);
+        $this->news = json_decode($response, true);
+
+        if (!is_array($this->news)) {
+            $this->news = ['error' => 'Impossibile recuperare le news'];
+        }
     }
+
     public function render()
     {
         return view('livewire.latest-news');

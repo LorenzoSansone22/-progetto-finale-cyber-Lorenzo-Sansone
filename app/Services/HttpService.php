@@ -4,13 +4,14 @@ namespace App\Services;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\RequestException;
+use Illuminate\Support\Facades\Auth;
 
 class HttpService
 {
     protected $client;
-    protected $allowedDomains = ['internal.finance','newsapi.org'];
+    protected $allowedDomains = ['internal.finance', 'newsapi.org'];
     protected $allowedProtocols = ['http', 'https'];
-    protected $refererHeader; // Intestazione Referer
+    protected $refererHeader;
 
     public function __construct()
     {
@@ -22,17 +23,21 @@ class HttpService
     {
         $parsedUrl = parse_url($url);
 
-        // Validate protocol
-        if (!in_array($parsedUrl['scheme'], $this->allowedProtocols)) {
+        if (!isset($parsedUrl['scheme']) || !in_array($parsedUrl['scheme'], $this->allowedProtocols, true)) {
             return 'Protocol not allowed';
         }
-       
-        // Validate domain
-        if (!isset($parsedUrl['host']) || !in_array($parsedUrl['host'], $this->allowedDomains)) {
+
+        if (!isset($parsedUrl['host']) || !in_array($parsedUrl['host'], $this->allowedDomains, true)) {
             return 'Domain not allowed';
         }
 
-        // Aggiungi l'intestazione Referer per le richieste al server locale
+        // Solo gli admin possono richiedere dati a internal.finance
+        if ($parsedUrl['host'] === 'internal.finance') {
+            if (!Auth::check() || !Auth::user()->is_admin) {
+                return json_encode(['error' => 'Forbidden']);
+            }
+        }
+
         $options['headers'] = ['Referer' => $this->refererHeader];
 
         try {
